@@ -36,6 +36,6 @@ public class MatrixBestRoute{
            {
               numRecursiveCalls = 0;
               // start from top left of the matrix;
-              countPaths( matrix, 0 ,0);
+              return countPaths( matrix, 0 ,0);
            }
 }
