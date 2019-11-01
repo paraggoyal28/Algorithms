@@ -1,0 +1,432 @@
+According to sieve, "sieve" means A utensil of wire mesh or closely perforated metal, used for straining, sifting, 
+ricing, or pureeing. Similar to this definition, sieve is a method of doing stuffs, where you keep rejecting things 
+that are useless and reducing the space that you are currently looking at.
+
+Example of application of sieve:
+
+1. Finding primes upto N
+You have to print all primes upto N.
+
+METHOD 1
+For all the numbers i from 1 to N, check if i is prime or not. If it is a prime, then print it.
+
+Subproblem:
+Checking whether a number K is prime.
+
+Solution:
+1. For all numbers i from 2 to K-1 , check if K is divisible by i ( as every number is divisible by 1 and itself). If yes, then not 
+a prime else it is a prime number.
+Complexity of the solution:O(K)
+
+2. Note that we do not need to check upto K-1, instead we can check upto sqrt(K).
+Proof:
+Let us say a number K = a*b.Note that atleast one of the a and b <= sqrt(K) otherwise product of them would exceed K. So check just upto 
+sqrt(K).
+
+3. Either use some probabilistic method for finding whether a number is prime or not.
+
+METHOD 2
+Now here comes the idea of sieve. So initially assume that all numbers are prime. Then you try to sieve/refine your search range by
+not looking at the entire numbers but at the reduced range e.g When you find all the numbers which are divisible by 2, you donot look
+at those again, as they are already not prime.So those numbers are sieved out.Now try for 3,5,7 upto n.
+In other terms, You first try all numbers which are divisible by 2(except 2 itself).
+Note that all these wont be primes.So you can remove them from consideration. Now try the same for 3,4,...N. Finally you will end up with
+only prime numbers.For understanding the actual thing going on, see the code. So the code basically sets all the numbers upto N to
+be prime.Then for every number that is still prime, we set all of its multiples to be non-prime.
+
+import java.io.*;
+import java.util.*;
+import java.math.*;
+public class Main{
+	static boolean[] isPrime;
+	
+	public static void sieveOptimized(int N){
+		isPrime = new boolean[N+1];
+		
+		for(int i = 2; i <= N; i++)
+			isPrime[i] = true;
+		for(int i = 2;i * i <= N;i++)
+		{
+			if(isPrime[i])
+			{
+			// For further optimization, You can do instead of j += i, j += (2 * i).
+			for(int j = i * i;j <= N; j += i)
+			{
+				isPrime[j] = false;
+			}
+		}
+	}
+	
+	public static void sieve(int N){
+		isPrime = new boolean[N + 1];
+		
+		for(int i = 2;i <= N; i++)
+			isPrime[i] = true;
+		for(int i = 2;i <= N; i++)
+		{
+			if(isPrime[i])
+			{
+				for(int j = i + i;j <= N; j += i)
+				{
+					isPrime[j] = false;
+				}
+			}
+		}
+	}
+	
+	public static void main(String args[]){
+		Scanner sc = new Scanner(System.in);
+		int limit = sc.nextInt();
+		
+		// call the sieve method
+		sieveOptimized(limit);
+		
+		for(int i = 1;i <= limit;i++)
+		{
+			if(isPrime[i])
+			{
+				System.out.println("%d",i);
+			}
+		}
+	}
+}
+
+Now comes the complexity part: The complexity of this code is O(nlogn).
+Proof: This proof comes a lot of times in various algorithms.)
+For all numbers i going from 2 to n, you need to check all the multiples of i.Note that number of multiples of i upto n are n/i.
+Hence expression for the complexities will be written as n/2 + n/3 + n/4 + n/5 + .... 1. Take n common out, of the expression.
+Now it becomes n*(1 + 2 + 3 + 4 + 5 + ... + 1/n).
+Now as the expression is definitely greater than n , so adding n to the expression won't have any effect on the complexity.So add n
+to the complexity, So the expression now becomes n*(1+1/2+1/3+1/4+1/5+...1/n). The expression (1+1/2+1/3+1/4+...1/n) is the harmonic
+sum and it is bounded by ln(n). Hence overall complexity is O(n*logn).
+Proof of harmonic sum:
+A simple proof: Let us integrate 1/x from 1 to n. Integration of 1/xdx is ln(x).
+
+2. Finding sum of divisors of numbers upto N.
+
+Now you have to find the sum of divisors of all numbers upto N. Here we are not just considering proper divisors(numbers other than 1
+and itself) we are considering all divisors.Here you can do something like this.
+Here let us say divisorSum[i] denotes the sum of divisors of i. Initially value of divisorSum[i] is equal to 0. Then for all numbers 
+from 1 to n, we check all the multiples of i(let us say j) and add i to the divisorSum[j].
+In other words, Start from 1 and for all the numbers which are multiples of 1, increment their sumDivisors by 1. 
+Now do the same for 2,3,....N.Note that for a number i, you are doing this adding operation upto n/i times.So the complexity 
+calculation is same as above.
+
+Look the beautiful code:
+
+import java.io.*;
+import java.util.*;
+import java.math.*;
+
+public class Main{
+	public static void main(String[] args){
+		Scanner sc = new Scanner(System.in);
+		int T = sc.nextInt();
+		
+		while(T--)
+		{
+			int n = sc.nextInt();
+			int divisorSum[] = new int[n+1];
+			
+			// For every number i, You know that 2*i, 3*i, 4*i upto K*i such that K*i<=n, will have i
+			// as one of its divisors, so add that to divisorSum[j].
+				
+			for(int i = 1; i <= n ; i++)
+			{
+				for(int j = i;j <= n ; j+=i)
+				{
+					divisorSum[j] += i;
+				}
+			}
+			
+			// Complexity of this code is O(n*lg(n)).
+			// Proof: Expression for the complexity can be written as n/1 + n/2 + n/3 + .... + 1
+			// take n common
+			// n * (1 + 1/2 + 1/3 + 1/4 + ... + 1/n)
+			// (1 + 1/2 + 1/3 + 1/4 + .... + 1/n) is the harmonic sum and it is bounded by logn.
+			// A simple proof: Let us integrate 1/xdx from 1 to n.
+			// Integration of 1/xdx is ln(x).
+			
+			for(int i = 1;i <= n;i++)
+			{
+				System.out.printf("%d ",divisorSum[i]);
+			}
+			System.out.printf(" ");
+		}
+	}
+}
+
+Finding Number of Divisors of numbers upto N.
+
+This is also same as the previous example. Here instead of storing the sum in the array, store the number of divisors and 
+for every multiple of i (say j), In the previous example, you were adding value i to divisorSum[j], Here just increment the
+noOfDivisors[j] by one.
+Code is very easy and hence omitted. Complexity is also same.
+
+Sieve For Finding Euler Phi Function.
+
+I will denote the euler phi function for a number n by phi(n). phi(n) is defined as follows.
+
+It is the count of how many numbers from 1 to n are coprime ( having gcd value 1) to n.
+
+For example, phi(6) = 2, as 1,5 are coprime to 6.
+
+Few properties of phi function:
+
+1. phi(p) = p-1, where p is a prime number. All the numbers from 1 to p-1 are coprime to p.
+2. phi(a*b) = phi(a) * phi(b) where a and b are coprime.
+3. phi(p^k) = p^k-p^(k-1). Note that here ^ denotes power. Here all the numbers from 1 to p^k are coprime to p^k except all multiples
+of p, which are exactly p^(k-1).
+
+Method of finding:
+
+Simple : For all numbers from 1 to n, check if it is coprime to n or not, if it is then add it to your answer.
+
+Let us say your number is n, which can be denoted as p1^k1 * p2^k2 * p3^k3 *... pm^km. Note that p1,p2,p3 ... pk are prime.Basically
+we have written n in its prime representation. Then phi(n) would be [p1^k1 - p1^(k1-1)]*....[pm^km - pm^(km-1)]. The expression for n 
+can be written as p1^k1 * p2^k2 * p3^k3 *... * pm^km * (1-1/p1) * (1-1/p2) * (1-1/p3) *...*(1-1/pm), which is equal to 
+n * (1-1/p1) * (1-1/p2) * (1-1/p3) * (1-1/p4) * .... * (1-1/pm).
+
+See the code for details.
+
+import java.io.*;
+import java.util.*;
+import java.math.*;
+public class Main{
+	public static boolean isPrime(int n){
+		if(n<2)
+			return false;
+		for(int i = 2;i*i<=n; i++)
+			if(n % i == 0)
+				return false;
+		return true;
+	}
+	
+	public static int eulerPhiDirect(int n){
+		int result = n;
+		for ( int i = 2; i <= n; i++){
+			if(isPrime(i) && n%i==0)
+				result -= result/i;
+		}
+		return result;
+	}
+	public static int eulerPhi(int n){
+		int result = n;
+		for(int i = 2; i*i <= n ;i++)
+		{
+			if( n % i == 0)
+			{
+				result -= result/i;
+				
+				while (n % i == 0)
+				{
+					n /= i;
+				}
+			}
+		}
+		if( n > 1){
+			result -= result/n;
+		}
+		return result;
+	}
+	
+	public static void main(String[] args){
+		Scanner sc = new Scanner(System.in);
+		int T = sc.nextInt();
+		while(T--){
+			int n = sc.nextInt();
+			int ans = eulerPhi(n);
+			System.out.println(ans);
+		}
+	}
+}
+
+Now let us calculate the value of sieve of all numbers from 1 to N.
+Let us say eulerPhi[i] dentoes the value of phi[i]. Assign initially all the values of eulerPhi* to be i. Then for every prime p,
+for all multiples of p, we will multiply value of eulerPhi* by (1-1/p) as per the formula. multiplying eulerPhi by (1-1/p) is
+exactly equal to eulerPhi* -= eulerPhi*/p;
+
+import java.io.*;
+import java.util.*;
+import java.math.*;
+
+public class Main{
+	public static boolean isPrime(int n){
+		if(n<2)
+			return false;
+		for(int i = 2; i * i <= n; i++)
+			if( n % i == 0)
+				return false;
+		return true;
+	}
+	private static int[] eulerPhi;
+	
+	public static void eulerSieve (int N){
+		eulerPhi = new int[N+1];
+		// set initial value of phi(i) = i;
+		for(int i = 1;i <= N; i++)
+			eulerPhi* = i;
+		for(int i = 1;i <= N; i++)
+		{
+			if(isPrime(i)){
+				for(int j = i; j <= N; j += i){
+					eulerPhi[j] -= eulerPhi[j]/i;
+				}
+			}
+		}
+	}
+	public static void main(String[] args){
+		Scanner sc = new Scanner(System.in);
+		int N = sc.nextInt();
+		eulerSieve(N);
+		for(int i = 1;i <= N; i++)
+			System.out.println("%d ",eulerPhi[i]);
+	}
+}
+
+Sieve for finding inverse modulo m.
+
+Inverse of a number a with respect to m is defined is a * b =1 mod m.Then b is called inverse of a modulo m. Let us play around
+the expressions. a * b = 1 mod m can be written as a * b = 1 + m * k, which can be written as a * b - m * k = 1. If the left 
+side has a common factor of both a and m, means gcd(a,m) != 1, then note that the right side won't be divisible by that number.
+Hence no solution of the equation when a and m has gcd non zero. Hence inverse will exist when a and m have non zero gcd.
+Now solving a * b + m * (-k) = 1, written same as a * b + m * k1 = 1. So let us try to find the solution of a * b + k * m = 1. This 
+k is not equal to previous k, in fact it is equal to -k. So let us try to solve the generic problem a * x + b * y = 1, where a and b
+can also be negative and gcd(a,b) = 1.
+Let us try a simpler version of the same problem which is solving b * x1 + (a % b) * y = 1;
+Now try to relate these equations.
+a % b = a - [a/b] * b, where [] denotes the floor function. This is same as removing all multiples of b from a, which is exactly equal
+to a % b.
+Now the equation turns into b * x1 + (a - [a/b] * b) * y1 = 1, which is a * y1 + b * (x1 - [a/b] * y1) = 1.
+So this is recursive form of a * x + b * y = 1, where x is replaced by y1 and y is replaced by x1 - [a/b] * y1.
+Things getting complex.
+( Note that this method is same as calculation gcd of two numbers).
+Complexity of this code is same as gcd as it has exactly the same recurrence formula as of that. Time complexity of gcd(n,m) is 
+log(max(n,m)). Hence we can consider the time complexity of this method to be around O(logn).
+
+import java.io.*;
+import java.util.*;
+import java.math.*;
+
+class pair{
+	public int x,y;
+	pair(int x, int y){
+		this.x = x;
+		this.y = y;
+	}
+	boolean isEquals (pair p){
+		if(this.x == p.x && this.y == p.y){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+}
+public class Main{
+	public static int gcd(int a, int b){
+		if(b == 0)
+			return a;
+		return gcd(b, a%b);
+	}
+	public static pair solve(int a,int b){
+		if(b == 0){
+			// a * x + b * y = 1
+			// here b = 0
+			// hence a * x = 1
+			// if a is not 1, then error else x = 1 and y = 0
+			// Note that the error wonot be here, we will always find a which is 1
+			// as error case is already handled in solveThis function.
+			return new pair(1,0);
+		}
+		else{
+			// do the recursive call
+			pair p = solve(b, a%b);
+			int x1 = p.x;
+			int y1 = p.y;
+			int x = y1;
+			int y = x1 - (a/b) * y1;
+			return new pair(x,y);
+		}
+	}
+	public static pair solveThis ( int a, int b){
+		if( gcd(a, b) != 1)
+		// (-1,-1) is the corresponding to error, that means no inverse exists in this case
+			return new pair(-1,-1);
+		else
+			return solve(a,b);
+	}
+	public static int modpow(long a, long b, long c){
+		long res = 1;
+		while ( b > 0){
+			if(b % 2 == 1){
+				res = (res * a) % c;
+			}
+			a = (a * a) % c;
+			b >>= 1;
+		}
+		return (int) res;
+	}
+	public static int findInverseModuloPrime (int a, int p){
+		return modpow (a,p-2,p);
+	}
+	public static void main(String[] args){
+		Scanner sc = new Scanner(System.in);
+
+		int a = sc.nextInt();
+		int m = sc.nextInt();
+
+		pair p = solveThis(a, m);
+
+		if(p.isEquals(new pair(-1,-1))
+			System.out.printf("Error, inverse don't exist");
+		else
+			System.out.printf("%d %d",p.x,p.y);
+	}
+}
+
+Another easier method:
+Now I will tell you another easier method. Generalized version of Fermat's theorem says that a^(phi(m)) = 1 mod m where gcd(a,m) = 1.
+For finding inverse a^(phi(m)-1) = 1/a(mod m) = (inverse(a)) mod m.
+Hence for finding inverse(a) mod m , you can just find a^(phi(m)-1) by modular exponention method. In case of m being prime, as 
+phi(m) = m-1 , so just find a^(m-2)%m. This is what precisely computed by modpow function in the above function.
+
+Complexity:
+Now Sieve for finding inverse modulo m:
+You have to find inverse(i) mod m for i ranging from 1 to n.
+As complexity of modpow is log(n). and we are doing this for n numbers.Hence total complexity will be O(n*logn).
+inverse(i) = (-(m/i)*inverse(m%i))%m + m;
+
+Proof:
+It is good one. 
+
+import java.util.*;
+import java.io.*;
+import java.math.*;
+
+public class Main{
+	public static void main(String[] args){
+		Scanner sc = new Scanner(System.in);
+		
+		int n = sc.nextInt(); // denotes the range upto which you want to find the value of modInverse*
+		int m = sc.nextInt();
+		
+		int modInverse[] = new int[n+1];
+		
+		modInverse[1] = 1; // because 1*1 mod m = 1
+		
+		for(int i = 2; i <= n ; i++)
+		{
+			modInverse* = (-(m/i) * modInverse[m % i]) % m + m;
+		}
+		for(int i = 2; i <= n; i++)
+		{
+			System.out.printf("%d ", modInverse*);
+		}
+	}
+}
+		
+
+				
+		
+		
