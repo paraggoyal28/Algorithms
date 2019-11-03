@@ -131,5 +131,21 @@ P[x] = FIND-SET(P[x])
 return P[x]
 
 
+Now lets see how the heuristics helped the running time. If we use only the first heuristic "union by rank" then we will get the same
+running time we achieved with the weighted union heuristic when we use lists for representation. When we use both "union by rank"
+and "path compression" , the worst running time is O(m alpha(m,n)) where alpha(m,n) is the very slowly growing inverse of Ackermann's
+function. In applications, alpha(m,n)<=4, that's why we can say that the running time is linear in terms of m, in practical situations.
+
+Back to the problem
+The problem from the beginning of the article is solvable in O(N + M) and O(N) for memory using disjoint-set data structure.
+The difference for the time execution is not big if the problem is solved with BFS, but we don't need to keep in memory the vertices
+of the graph. Let's see if the problem was like: In a room there are N persons and you have to handle Q queries. A query is of the form
+"x y 1" meaning that x and y are friends , or "x y 2" meaning that we are asked to output if x and y are in the same group of friends
+at that moment in time.In this case, the solution with disjoint-set data structure is the fastest, giving a complexity of O(N + Q).
+
+
+
+
+
 
 
