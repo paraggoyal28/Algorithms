@@ -1,0 +1,54 @@
+Introduction
+Many times the efficiency of an algorithm depends on the data structures used in the algorithm. 
+A wise choice in the structure you use in solving a problem can reduce the time of execution, the time to implement the algorithm and 
+the amount of memory used. During SRM competitions we are limited to a time limit of 2 seconds and 64 MB of memory, 
+so the right data structure can help you remain in competition.
+
+The Problem
+Let's consider the following problem: In a room there are N persons, and we will define two persons as friends if they are directly or 
+indirectly friends. If A is friend with B, and B with C, then A is a friend with C too. A group of friends is a group of persons where 
+any two persons in the group are friends. Given the list of persons that are direct friends find the number of groups of friends and the
+number of persons in each group. For example, N = 5 and the list of friends is : 1-2, 5-4, 5-1. 1 and 2 are friends, then 5 and 4 are 
+friends, and then 5 and 1 are friends, but 1 is friend with 2 so 5 is friend with 2 also.
+In the end there are 2 groups of friends: { 1,2,4,5} and {3}.
+
+The solution
+This problem can be solved using BFS, but let's see how to solve these kind of problems using data structures for disjoint sets. First
+of all: a disjoint-set data structure is a structure that maintains a collection S1, S2, S3, ... Sn of dynamic disjoint sets.Two 
+sets are disjoint if their intersection is null. For example set {1,2,3} and {1,5,6} aren't disjoint because they have in common {1},
+but the sets {1,2,3} and {5,6} are disjoint because their intersection is null. In a data structure of disjoint sets every set contains
+a representative, which is one member of the set.
+Let's see how things will work with sets for the example of the problem. The groups will be represented by sets, and the representative 
+of each group is the person with biggest index. At the beginning there are 5 groups(sets): {1},{2},{3},{4},{5}. Nobody is anybody's friend
+and everyone is the representative of his or her own group.
+The next step is 1 and 2 become friends, this means the group containing 1 and the group with 2 will become one group. This will give us
+these groups: {1,2},{3},{4},{5}, and the representative of the first group will become 2. Next 5, and 4 become friends.The groups will be
+{1,2},{3},{4,5}.And in the last step 5 and 1 become friends and the groups will be {1,2,4,5} and {3}. The representative of first group 
+will be 5 and the representative of second group will be 3. At the end we have 2 sets, the first set with 4 elements and second with one,
+and this is the answer for the problem example : 2 groups, 1 group of 4 and 1 group of 1.
+Perhaps now you are wondering how you can check if 2 persons are in the same group. This is where the use of the representative elements
+comes in. Let's say we want to check if 3 and 2 are in the same group, we will know this if the representative of the set contains 3 is the
+same as the representative of the set that contains 2. One representative is 5 and other one is 3; therefore 3 and 2 aren't in the same
+groups of friends.
+
+Some Operations
+Let's define the following operations:
+1. CREATE-SET(x) : create a new set with one element(x).
+2. MERGE-SETS(x,y) : merge into one set the set that contains element x and the set that contains element y 
+(x and y are in different sets). The original sets will be destroyed.
+3. FIND-SET(x) : returns the representative or a pointer to the representative of the set that contains the element x.
+
+The solution using these operations.
+Let's see the solution for our problem using these operations.
+
+READ N;
+for(each person x from 1 to N) CREATE-SET(x)
+for(each pair of friends(x,y)) if (FIND-SET(x) != FIND-SET(y)) MERGE-SETS(x,y).
+
+Now if we want to see if 2 persons (x,y) are in the same group we can check if FIND-SET(x) == FIND-SET(y).
+
+We will analyze the running time of the disjoint-set data structure in terms of N and M, where N is the number of times the CREATE-SET(x)
+is called and M is the total number of times that CREATE-SET(x), MERGE-SETS(x,y) and FIND-SET(x) are called.
+
+
+
