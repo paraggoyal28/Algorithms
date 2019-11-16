@@ -69,9 +69,9 @@ void solve(){
 }
 
 int main(){
-    clock_t beg = clock();
+    // clock_t beg = clock();
     solve();
-    clock_t end = clock();
-    fprintf(stderr, "%.3f sec\n",double(end - beg)/ CLOCKS_PER_SEC);
+    // clock_t end = clock();
+    // fprintf(stderr, "%.3f sec\n",double(end - beg)/ CLOCKS_PER_SEC);
     return 0;
 }
