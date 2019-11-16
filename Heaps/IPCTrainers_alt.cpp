@@ -11,8 +11,8 @@
 #include <stack>
 #include <queue>
 #include <tuple>
-#define getchar getchar_unlocked
-#define putchar putchar_unlocked
+// #define getchar getchar_unlocked
+// #define putchar putchar_unlocked
 #define _rep(_1, _2, _3, _4, name, ...) name
 #define rep2(i, n) rep3(i, 0, n)
 #define rep3(i, a, b) rep4(i, a, b, 1)
