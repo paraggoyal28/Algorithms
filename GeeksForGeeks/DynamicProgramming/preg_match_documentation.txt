@@ -1,0 +1,414 @@
+preg_match
+(PHP 4, PHP 5, PHP 7)
+preg_match - Perform a regular expression match
+
+Description
+
+preg_match( string $pattern, string $subject [, array &$matches [, int $flags = 0 [, int $offset = 0 ]]] ) : int
+
+Searches subject for a match to the regular expression given in pattern.
+
+Parameters
+
+pattern
+The pattern to search for, as a string.
+
+subject
+The input string
+
+matches
+If matches is provided, then it is filled with the results of search.
+$matches[0]  will contain the text that matched the full pattern,
+$matches[1] will have the text that matched the first captured parenthesized 
+subpattern, and so on.
+
+flags
+flags can be a combination of the following flags:
+
+1. PREG_OFFSET_CAPTURE
+If this flag is passed, for every occuring match the appendant string offset (in bytes) will
+also be returned. Note that this changes the value of the matches into an array where
+every element is an array consisting of the matched string at offset 0 and its string offset 
+in the subject at offset 1.
+<?php
+preg_match('/(foo)(bar)(baz)/','foobarbaz', $matches, PREG_OFFSET_CAPTURE);
+print_r($matches);
+?>
+The above example will output:
+Array 
+(
+	[0] => Array
+		(
+			[0] => foobarbaz
+			[1] => 0
+		)
+	[1] => Array
+		(
+			[0] => foo
+			[1] => 0
+		)
+	[2] => Array
+		(
+			[0] => bar
+			[1] => 3
+		)
+	[3] => Array
+		(
+			[0] => baz
+			[1] => 6
+		)
+)
+
+PREG_UNMATCHED_AS_NULL
+If this flag is passed, unmatched subpatterns are reported as NULL; otherwise they are reported
+as an empty strings.
+
+<?php
+preg_match('/(a)(b)*(c)/', 'ac', $matches);
+var_dump($matches);
+preg_match('/(a)(b)*(c)/', 'ac', $matches, PREG_UNMATCHED_AS_NULL);
+var_dump($matches);
+?>
+The above example will output:
+array(4) {
+	[0] => string(2) "ac"
+	[1] => string(1) "a" 
+	[2] => string(0) ""
+	[3] => string(1) "c"
+}
+array(4) {
+	[0] => string(2) "ac"
+	[1] => string(1) "a"
+	[2] => NULL
+	[3] => string(1) "c"
+}
+
+offset
+Normally, the search starts from the beginning of the subject string. The optional parameter
+offset can be used to specify the alternate place from which to start the search (in bytes).
+
+Note: 
+Using offset is not equivalent to passing substr($subject, $offset) to preg_match() in place of
+the subject string, because the pattern can contain assertions such as ^,$ or (?<=x). Compare:
+<?php
+$subject = "abcdef";
+$pattern = '/^def/';
+preg_match($pattern, $subject, $matches, PREG_OFFSET_CAPTURE, 3);
+print_r($matches);
+?>
+The above example will output:
+Array
+(
+)
+while this example:
+<?php
+$subject = "abcdef";
+$pattern = '/^def/';
+preg_match($pattern, substr($subject, 3), $matches, PREG_OFFSET_CAPTURE);
+print_r($matches);
+?>
+will produce
+Array
+(
+	[0] => Array
+		(
+			[0] => def
+			[1] => 0
+		)
+)
+
+Alternatively to avoid using substr(), use the |G assertion rather than the ^ anchor, or the A 
+modifier instead, both of which work with the offset parameter.
+preg_match() returns 1 if the pattern matches given subject,0 if does not, or FALSE if an error
+occured.
+
+mysql_fetch_assoc
+(PHP 4 >= 4.0.3, PHP 5)
+mysql_fetch_assoc - Fetch a result row as an associative array
+
+mysqli_fetch_assoc
+PHP 5, PHP 7
+mysqli_result:: fetch_assoc -- mysqli_fetch_assoc - Fetch a result row as an associative array
+Description
+Object oriented style
+mysqli_result::fetch_assoc(void):array
+Procedural style
+mysqli_fetch_assoc(mysqli_result $result): array
+Returns an associative array that corresponds to the fetched row or NULL if there are no more 
+rows.
+Note: Field names returned by this function are case-sensitive.
+Note: This function sets NULL fields to the PHP NULL value.
+
+Parameters
+result
+Procedure Style Only: A result set identifier returned by mysqli_query(), mysqli_store_result(), or  mysqli_use_result().
+Return Values
+Returns an associative array of strings representing the fetched row in the result set, where each
+key in the array represents the name of one of the result set's columns or NULL if there are no
+more rows in resultset.
+
+If two or more columns of the result have the same field names, the last column will take 
+precedence. To access the other column(s) of the same name, you either need to access the result
+with numeric indices by using mysqli_fetch_row() or add alias names.
+
+Examples
+Example #1 Object oriented style
+<?php
+$mysqli = new mysqli("localhost", "my_user", "my_password", "world");
+
+/* check connection */
+if ($mysqli->connect_errno) {
+	printf("Connect failed: %s\n", $mysqli->connect_error);
+	exit();
+}
+
+$query = "SELECT Name, CountryCode FROM City ORDER BY ID DESC LIMIT 50, 5";
+
+LIMIT [offset], rows
+
+if ($result = $mysqli->query($query)) {
+
+	/* fetch associative array */
+	while ($row = $result->fetch_assoc()) {
+		printf("%s (%s)\n", $row["Name"], $row["CountryCode"]);
+	}
+	
+	/* free result set */
+	$result->free();
+}
+
+/* close connection */
+$mysqli->close();
+?>
+
+EXAMPLE #2 Procedural Style
+<?php
+$link = mysqli_connect("localhost", "my_user", "my_password", "world");
+
+/* check connection */
+if (mysqli_connect_errno()) {
+	printf("Connect failed: %s\n", mysqli_connect_error());
+	exit();
+}
+
+$query = "SELECT Name, CountryCode FROM City ORDER by ID Desc LIMIT 50, 5";
+
+if($result = mysqli_query($link, $query)) {
+	
+	/* fetch associative array */
+	while ($row = mysqli_fetch_assoc($result)) {
+		printf ("%s (%s)\n", $row["Name"], $row["CountryCode"]);
+	}
+	
+	/* free result set */
+	mysqli_free_result($result);
+}
+
+/* close connection */
+mysqli_close($link);
+?>
+
+The above examples will output:
+Pueblo (USA)
+Arvada (USA)
+Cape Coral (USA)
+Green Bay (USA)
+Santa Clara (USA)
+
+Example #3 A mysqli_result example conparing iterator usage
+<?php
+$c = mysqli_connect('127.0.0.1', 'user', 'pass');
+
+// Using iterators (support was added with PHP 5.4)
+foreach ($c -> query('SELECT user,host FROM mysql.user') as $row ) {
+	printf("'%s'@'%s'\n", $row['user'], $row['host'](;
+}
+
+echo "\n================\n";
+
+// Not using iterators
+$result = $c->query('SELECT user, host FROM mysql.user');
+while($row = $result->fetch_assoc()) {
+	printf("'%s'@'%s'\n", $row['user'], $row['host']);
+}
+
+?>
+
+The above example will output something similar to:
+'root'@'192.168.1.1'
+'root'@'127.0.0.1'
+'dude'@'localhost'
+'lebowski'@'localhost'
+
+=======================
+
+'root'@'192.168.1.1'
+'root'@'127.0.0.1'
+'dude'@'localhost'
+'lebowski'@'localhost'
+
+See Also
+1. mysqli_fetch_array() - Fetch a result row as an associative, a numeric array, or both
+2. mysqli_fetch_row() - Get a result row as an enumerated array
+3. mysqli_fetch_object() - Returns the current row of the result set as an object
+4. mysqli_query() - Performs a query on the database
+5. mysqli_data_seek() - Adjusts the result pointer to an arbitrary row in the result
+
+file_get_contents
+(PHP 4 >= 4.3.0, PHP 5, PHP 7)
+file_get_contents - Reads entire file into the string
+
+Description
+file_get_contents ( string $filename [, bool $use_include_path = FALSE [, resource $context [,
+int $offset = 0 [, int $maxlen ]]]] ) :string
+
+This function is similar to file(), except that file_get_contents() returns the file in a string,
+starting at the specified offset up to maxlen bytes. On failure, file_get_contents() will return FALSE.
+file_get_contents() is the preferred way to read the contents of a file into a string. It will use
+memory mapping techniques if supported by our OS to enhance performance.
+
+NOTE: 
+If we are opening a URI with special characters, such as spaces, we need to encode the URI with
+urlencode().
+
+Parameters
+
+filename
+Name of the file to be read
+
+use_include_path
+NOTE:
+The FILE_USE_INCLUDE_PATH constant can be used to trigger include path search.
+This is not possible if strict typing is enabled, since FILE_USE_INCLUDE_PATH 
+is an int. Use TRUE instead.
+
+context
+A valid context resource created with stream_context_create(). If we don't need to use
+a custom context, we can skip this parameter by NULL.
+
+offset
+The offset where the reading starts on the original stream. Negative offsets count from the 
+end of the stream.
+Seeking(offset) is not supported with remote files. Attempting to seek on non-local files
+may work with small offsets, but this is unpredictable because it works on the buffered stream.
+
+maxlen
+Maximum length of data read. The default is to read until end of file is reached. Note that this 
+parameter is applied to the stream processed by the filters.
+
+Return Values
+The function returns the read data or FALSE on failure.
+WARNING
+This function may return Boolean FALSE, but may alos return a non-Boolean value which evaluates to FALSE. 
+Errors/ Exceptions
+An E_WARNING level error is generated if filename cannot be found, maxlength is less than zero, 
+or if seeking to the specified offset in the stream fails.
+
+include_path string
+Specifies a list of directories where the require, include, fopen(), file(), readfile(), and 
+file_get_contents() functions look for files. The format is like the system's PATH environment variable: a list of directories separated with a colon in Unix or semicolon in Windows.
+PHP considers each entry in the include path separately when looking for files to include.
+It will check the first path, and if it doesn't find it, check the next path, until it either
+locates the included file or returns with a warning or an error. You may modifyt or set your
+include path at runtime using set_include_path().
+
+Example #1 Unix include_path
+include_path = ".:/php/includes"
+
+Example #2 Windows include_path
+include_path = ".;c:\php\includes"
+Using a . in the include path allows for relative includes as it means the current directory.
+However it is more efficient to explicitly use include './file' than having PHP always check the
+current directory for every include.
+
+Note:
+ENV variables are also accessible in .ini files. As such it is possible to reference the home
+directory using ${LOGIN} and ${USER}.
+Environment variables may vary between Server APIs as those environments may be different.
+
+Example #3 Unix include_path using ${USER} env variable
+include_path = ".:${USER}/pear/php"
+
+
+PHP file_get_contents()
+Examples
+Example #1: Get and output the source of the homepage of a website
+<?php
+$homepage = file_get_contents('http://www.example.com/');
+echo $homepage;
+?>
+
+Example #2: Searching within the include_path
+<?php
+// If strict types are enables i.e declare(strict_types = 1);
+$file = file_get_contents('./people.txt', true);
+// Otherwise
+$file = file_get_contents('./people.txt', FILE_USE_INCLUDE_PATH);
+?>
+
+urlencode
+(PHP 4, PHP 5, PHP 7)
+urlencode - URL-encodes string
+Description
+urlencode (string $str) : string
+This function is convenient when encoding a string to be used in a query part of a URL, as a
+convenient way to pass variables to the next page.
+Parameters
+str -> The string to be encoded.  
+Return Values
+Returns a string in which all no-alphanumeric charcters except -_. have been replaced with a 
+percent(%) sign followed by two hex digits and spaces encoded as plus (+) signs. It is encoded the
+same way that the posted data from a WWW form is encoded , that is the same wat as in application/
+x-www-form-urlencoded media type. This differs from the >> RFC 3986 encoding ( rawurlencode()) 
+in that for historical reasons, spaces are encoded as plus(+) signs.
+
+require
+(PHP 4, PHP 5, PHP 7)
+require is identical to include except upon failure it will also produce a fatal 
+E_COMPILE_ERROR level error. In other words, it will halt the script whereas include 
+only emits a warning(E_WARNING) which allows the script to continue.
+
+filter_var
+(PHP 5 >= 5.2.0, PHP 7)
+filter_var - Filters a variable with a specified filer
+
+filter_var(mixed $variable [, int $filter = FILTER_DEFAULT [, mixed $options ]]) : mixed
+
+Parameters
+variable
+Value to filter. Note that the scalar values are converted to string internally before they
+are filtered.
+
+filter 
+The ID of the filter to apply.
+If omitted, FILTER_DEFAULT will be used, which is equivalent to FILTER_UNSAFE_RAW. This will
+result in no filtering taking place by default.
+
+options
+Associative array of options or bitwise disjunction of flags. If filter accepts options, 
+flags can be provided in "flags" field of array. For the "callback" filter, callable type should be passed. The callback must accept one arguement, the value to be filtered, and return the value 
+after filtering/sanitizing it.
+
+VALIDATE FILTERS
+
+ID                       NAME       OPTIONS   FLAGS 
+FILTER_VALIDATE_BOOLEAN  "boolean"  default   FILTER_NULL_ON_FAILURE       
+
+Returns TRUE for "1", "True", "on" and "yes". Returns FALSE otherwise.
+If FILTER_NULL_ON_FAILURE is set, FALSE is returned only for "0", "false",
+"off", "no", and "", and NULL is returned for all non-boolean values.
+
+FILTER_VALIDATE_DOMAIN  "validate_domain" default FILTER_FLAG_HOSTNAME
+
+Validates whether the domain name label lengths are valid.
+Valid domain names against RFC 1034, RFC 1035, RFC 952, RFC 1123, RFC 2732, 
+RFC 2181, and RFC 1123.
+Optional flag FILTER_FLAG_HOSTNAME adds ability to specifically validate_domain
+hostnames (they must start with an alpha numeric character and contain only alpha numerics or hypens).
+
+FILTER_VALIDATE_EMAIL  "validate_email" default FILTER_FLAG_EMAIL_UNICODE  
+
+Validates whether the value is a valid email address.
+In general, this validates e-mail addresses against the syntax in RFC 822, with the exceptions that comments and whitespace folding and dotless domain names are not supported.
+
+         

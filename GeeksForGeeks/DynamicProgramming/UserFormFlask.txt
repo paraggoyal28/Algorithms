@@ -1,0 +1,31 @@
+current_user.is_anonymous expression is going to be True only when the user is not logged in.
+Flask-Login provides a very useful feature that forces users to log in before they can view
+certain pages of the application. If a user who is not logged in tries to view a protected page,
+Flask-Login will automatically redirect the user to the login form, and only redirect back to the 
+page the user wanted to view after the login process is complete.
+For this feature to be implemented, Flask-Login needs to know what is the view function that handles
+logins. This can be added in app/__init__.py
+#.....
+login = LoginManager(app)
+login.login_view = 'login'
+
+The way Flask-Login protects a view function against anonymous users is with a decorator called
+@login_required.
+
+The third case is in place to make the application more secure. An attacker could insert a URL to a malicious site in the next argument, so the application only redirects when the URL is relative, which ensures that the redirect stays within the same site as the application. To determine if the URL is relative or absolute, I parse it with Werkzeug's url_parse() function and then check if the netloc component is set or not.
+
+Registration Form
+
+For the Email Field, a second validator apart from DataRequired called Email is added. This is another stock validator that comes with WTForms that will ensure that what the user types in this field matches the structure of an email address.
+
+The second password field uses yet another stock validator called EqualTo, which will make sure
+that its value is identical to the one for the first password field.
+
+I have also added two methods to this class called validate_username() and validate_email(). 
+When you add any methods that match the pattern validate_<field_name>, WTForms takes those as
+custom validators and invokes them in addition to the stock validators. In this case I want 
+to make sure that the username and email address entered by the user are not already in the 
+database, so these two methods issue database queries expecting there will be no results.
+In the event a result exists, a validation error is triggered by raising ValidationError. The 
+message included as the arguement in the exception will be the message that will be displayed next to the field for the user to see.
+
